@@ -24,6 +24,7 @@ void Render::display() {
     }
 }
 int Render::draw_rectangle(V2d coords1, V2d coords2, char ch) {
+    int errorCode = 0;
     int x1 = (int)coords1.x;
     int y1 = (int)coords1.y;
     int x2 = (int)coords2.x;
@@ -38,22 +39,21 @@ int Render::draw_rectangle(V2d coords1, V2d coords2, char ch) {
         y1 = y2;
         y2 = temp;
     }
-    vec<vec<char>> board_buffer = this->board;
     for (int y = y1; y < y2; y++) {
         for (int x = x1; x < x2; x++) {
             if (this->setchar(V2d(x, y), ch) == -1) {
-                this->board = board_buffer;
-                return -1;
+                errorCode = -1;
             }
         }
     }
-    return 0;
+    return errorCode;
 }
 
 int Render::draw_line(V2d coords1, V2d coords2, char ch) {
-    int s1, s2, l1, l2;
+    int s1, s2, l1, l2; //s for shorter axis, l for longer axis
     float a;
     bool isXLonger;
+    int errorCode = 0;
     if (abs(coords2.y - coords1.y) > abs(coords2.x - coords1.x)) {
         isXLonger = false;
         if (coords2.y < coords1.y) {
@@ -65,7 +65,6 @@ int Render::draw_line(V2d coords1, V2d coords2, char ch) {
         s2 = (int)coords2.x;
         l1 = (int)coords1.y;
         l2 = (int)coords2.y;
-        a = ((float)s2 - (float)s1) / ((float)l2 - (float)l1);
     } else {
         isXLonger = true;
         if (coords2.x < coords1.x) {
@@ -77,19 +76,20 @@ int Render::draw_line(V2d coords1, V2d coords2, char ch) {
         s2 = (int)coords2.y;
         l1 = (int)coords1.x;
         l2 = (int)coords2.x;
-        a = ((float)s2 - (float)s1) / ((float)l2 - (float)l1);
     }
+    a = ((float)s2 - (float)s1) / ((float)l2 - (float)l1);
 
     float fs1 = (float)s1;
     for (; l1 < l2; l1++) {
         fs1 += a;
         if (isXLonger) {
-            setchar(V2d(l1, (int)fs1), ch);
+            if (setchar(V2d(l1, (int)fs1), ch) == -1)
+                errorCode = -1;
         } else
-            setchar(V2d((int)fs1, l1), ch);
+            if (setchar(V2d((int)fs1, l1), ch) == -1)
+                errorCode = -1;
     }
-
-    return 0;
+    return errorCode;
 }
 
 int Render::setchar(V2d coords, char ch) {

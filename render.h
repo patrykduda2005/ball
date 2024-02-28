@@ -20,12 +20,12 @@ class Render {
     vec<vec<char>> board;
 
     private:
-    int setchar(V2d coords, char ch); //setchar (returns -1 when failed)
+    int setchar(V2d coords, char ch); //setchar (returns -1 when partially failed)
     public:
     Render(int x, int y);
     void display(); //render the scene
-    int draw_rectangle(V2d coords1, V2d coords2, char ch); //draws a square (returns -1 when failed)
-    int draw_line(V2d coords1, V2d coords2, char ch);
+    int draw_rectangle(V2d coords1, V2d coords2, char ch); //draws a square (returns -1 when partially failed)
+    int draw_line(V2d coords1, V2d coords2, char ch); //draws a line (returns -1 when partially failed)
 };
 
 #endif
