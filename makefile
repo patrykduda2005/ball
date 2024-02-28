@@ -9,3 +9,6 @@ main.o: main.cpp
 
 render.o: render.cpp render.h
 	g++ -c render.cpp
+
+clean:
+	rm *.o exe
