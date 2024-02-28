@@ -1,12 +1,4 @@
 #include "render.h"
-V2d::V2d(int x, int y) {
-    this->x = (float)x;
-    this->y = (float)y;
-}
-V2d::V2d(float x, float y) {
-    this->x = (float)x;
-    this->y = (float)y;
-}
 
 Render::Render(int x, int y) {
     vec<vec<char>> board(y, vec<char>(x, '.'));
@@ -22,6 +14,15 @@ void Render::display() {
         cout << endl;
         i++;
     }
+}
+char Render::get_char(V2d coords) {
+    int x = (int)coords.x;
+    int y = (int)coords.y;
+    if (y < 0 || y >= this->board.size())
+        return 'E';
+    if (x < 0 || x >= this->board[0].size())
+        return 'E';
+    return board.at(y).at(x);
 }
 int Render::draw_rectangle(V2d coords1, V2d coords2, char ch) {
     int errorCode = 0;

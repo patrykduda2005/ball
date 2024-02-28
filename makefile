@@ -1,14 +1,14 @@
 #exe: $(wildcard *.cpp)
 	#g++ *.cpp -o exe
 
-exe: main.o render.o
-	g++ main.o render.o -o exe
+OBJECTS=$(patsubst %.cpp,%.o,$(wildcard *.cpp))
 
-main.o: main.cpp
-	g++ -c main.cpp
+exe: $(OBJECTS)
+	g++ $(OBJECTS) -o exe
 
-render.o: render.cpp render.h
-	g++ -c render.cpp
+%.o: %.cpp %.h
+	g++ -c $<
+
 
 clean:
 	rm *.o exe
