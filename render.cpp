@@ -51,6 +51,44 @@ int Render::draw_rectangle(V2d coords1, V2d coords2, char ch) {
 }
 
 int Render::draw_line(V2d coords1, V2d coords2, char ch) {
+    int s1, s2, l1, l2;
+    float a;
+    bool isXLonger;
+    if (abs(coords2.y - coords1.y) > abs(coords2.x - coords1.x)) {
+        isXLonger = false;
+        if (coords2.y < coords1.y) {
+            V2d temp = coords1;
+            coords1 = coords2;
+            coords2 = temp;
+        }
+        s1 = (int)coords1.x;
+        s2 = (int)coords2.x;
+        l1 = (int)coords1.y;
+        l2 = (int)coords2.y;
+        a = ((float)s2 - (float)s1) / ((float)l2 - (float)l1);
+    } else {
+        isXLonger = true;
+        if (coords2.x < coords1.x) {
+            V2d temp = coords1;
+            coords1 = coords2;
+            coords2 = temp;
+        }
+        s1 = (int)coords1.y;
+        s2 = (int)coords2.y;
+        l1 = (int)coords1.x;
+        l2 = (int)coords2.x;
+        a = ((float)s2 - (float)s1) / ((float)l2 - (float)l1);
+    }
+
+    float fs1 = (float)s1;
+    for (; l1 < l2; l1++) {
+        fs1 += a;
+        if (isXLonger) {
+            setchar(V2d(l1, (int)fs1), ch);
+        } else
+            setchar(V2d((int)fs1, l1), ch);
+    }
+
     return 0;
 }
 

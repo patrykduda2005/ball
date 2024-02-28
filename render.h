@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <cstdlib>
 using namespace std;
 template <typename T>
 using vec = vector<T>;
