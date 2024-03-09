@@ -3,6 +3,8 @@
 Render::Render(int x, int y) {
     vec<vec<char>> board(y, vec<char>(x, '.'));
     this->board = board;
+    this->width = x;
+    this->height = y;
 }
 
 void Render::display() {
@@ -14,6 +16,10 @@ void Render::display() {
         cout << endl;
         i++;
     }
+}
+
+void Render::clear() {
+    this->draw_rectangle(V2d(0,0), V2d(this->width, this->height) , '.');
 }
 
 int Render::draw_rectangle(V2d coords1, V2d coords2, char ch, bool filled) {
@@ -42,97 +48,76 @@ int Render::draw_rectangle(V2d coords1, V2d coords2, char ch, bool filled) {
     }
     return errorCode;
 }
-//TODO: consistent from bottom to top pixel return
+//assumes y is longer
 vec<V2d> Render::get_pix_of_line(V2d coords1, V2d coords2) {
     vec<V2d> pixels;
-    int s1, s2, l1, l2; //s for shorter axis, l for longer axis
-    float a;
-    bool isXLonger;
-    int errorCode = 0;
-    if (abs(coords2.y - coords1.y) > abs(coords2.x - coords1.x)) {
-        isXLonger = false;
-        if (coords2.y < coords1.y) {
-            swap(coords1, coords2);
-        }
-        s1 = (int)coords1.x;
-        s2 = (int)coords2.x;
-        l1 = (int)coords1.y;
-        l2 = (int)coords2.y;
-    } else {
-        isXLonger = true;
-        if (coords2.x < coords1.x) {
-            swap(coords1, coords2);
-        }
-        s1 = (int)coords1.y;
-        s2 = (int)coords2.y;
-        l1 = (int)coords1.x;
-        l2 = (int)coords2.x;
+    //swap longer axis so its always from leasto most to most most
+    if (coords2.y < coords1.y) {
+        swap(coords1, coords2);
     }
-    a = ((float)s2 - (float)s1) / ((float)l2 - (float)l1);
-    int progress = 1;
-    bool isEdgeCaseXd = false;
-    if (isXLonger && s2 < s1) {
-        a *= -1;
-        progress = -1;
-        swap(l1, l2);
-        swap(s1, s2);
-        isEdgeCaseXd = true;
-    }
-
-    float fs1 = (float)s1;
-    for (; (l1 < l2 && !isEdgeCaseXd) || (l1 > l2 && isEdgeCaseXd); l1+=progress) {
+    int l1 = coords1.y;
+    int l2 = coords2.y;
+    if (l2 - l1 == 0) return {coords1};
+    float fs1 = coords1.x;
+    int s2 = coords2.x;
+    float a = ((float)s2 - fs1) / ((float)l2 - (float)l1);
+    for (; l1 < l2 ; l1++) {
+        pixels.push_back(V2d((int)round(fs1), l1));
         fs1 += a;
-        if (isXLonger) {
-            pixels.push_back(V2d(l1, (int)round(fs1)));
-        } else
-            pixels.push_back(V2d((int)round(fs1), l1));
     }
     return pixels;
 }
 
 int Render::draw_line(V2d coords1, V2d coords2, char ch) {
     int errorCode = 0;
+
+    //find out if y axis is longer
+    bool isYLonger = true;
+    if (abs(coords2.x - coords1.x) > abs(coords2.y - coords1.y)) {
+        coords1.swap();
+        coords2.swap();
+        isYLonger = false;
+    }
+    
     vec<V2d> pixels = get_pix_of_line(coords1, coords2);
     for (V2d pixel : pixels) {
+        //cout << pixel.x << " " << pixel.y << ";";
+        if (!isYLonger) pixel.swap();
         if (setchar(pixel, ch) == -1)
             errorCode = -1;
     }
+    //cout << endl;
     return errorCode;
+}
+
+bool less_than(V2d c1, V2d c2) {
+    return (c1.y < c2.y);
 }
 
 int Render::draw_triangle(V2d coords1, V2d coords2, V2d coords3, char ch, bool filled) {
     int errorCode = 0;
+    //sort points from bottom to top
     if (coords2.y < coords1.y) swap(coords1, coords2);
     if (coords3.y < coords1.y) swap(coords1, coords3);
     if (coords3.y < coords2.y) swap(coords2, coords3);
-    draw_line(coords1, coords2, ch);
-    draw_line(coords2, coords3, ch);
-    draw_line(coords3, coords1, ch);
+    //draw edges
+    draw_line(coords1, coords2, 'e');
+    draw_line(coords2, coords3, 'e');
+    draw_line(coords3, coords1, 'e');
+    if (!filled) return errorCode;
     vec<V2d> left_x = get_pix_of_line(coords1, coords3); // |
-    int y = -1;
-    vec<V2d> one_to_two;
-    for (V2d pixel : get_pix_of_line(coords2, coords1)) {
-        if (pixel.y != y) {
-            y = pixel.y;
-            one_to_two.push_back(pixel);
-        }
-    }
-    one_to_two.pop_back();
-    y = -1;
-    vec<V2d> two_to_three;
-    for (V2d pixel : get_pix_of_line(coords2, coords3)) {
-        if (pixel.y != y) {
-            y = pixel.y;
-            two_to_three.push_back(pixel);
-            cout << pixel.x << " " << pixel.y << ";";
-        }
-    }
-    cout << endl;
-    one_to_two.insert(one_to_two.end(), two_to_three.begin(), two_to_three.end());
-    //if (one_to_two.size() > left_x.size()) one_to_two.pop_back();
+                                                         //
+    vec<V2d> one_to_two = get_pix_of_line(coords1, coords2);
+    vec<V2d> two_to_three = get_pix_of_line(coords2, coords3);
+    //if (one_to_two.size() != 1 && two_to_three.size() != 1) one_to_two.pop_back();
+    if (one_to_two.size() == 1 && one_to_two[0].y == two_to_three[0].y) one_to_two.pop_back();
+    vec<V2d> right_x(one_to_two.begin(), one_to_two.end());
+    right_x.insert(right_x.end(), two_to_three.begin(), two_to_three.end());
+
+    //for (V2d z : right_x) cout << z.x << " " << z.y << "; ";
     for (int i = 0; i < left_x.size(); i++) {
-        cout << left_x[i].x << " " << left_x[i].y << "<>" << one_to_two[i].x << " " << one_to_two[i].y << ";" << endl;
-        draw_line(left_x[i], one_to_two[i], ch);
+        cout << left_x[i].x << " " << left_x[i].y << "<>" << right_x[i].x << " " << right_x[i].y << ";" << one_to_two.size() << endl;
+        draw_line(left_x[i], right_x[i], ch);
     }
     return errorCode;
 }
