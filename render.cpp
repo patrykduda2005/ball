@@ -7,7 +7,13 @@ Render::Render(int x, int y) {
     this->height = y;
 }
 
-void Render::display() {
+void Render::display(bool braille) {
+    if (braille) {
+        Braille b = Braille(this->board);
+        b.display();
+        return;
+    }
+
     int i = 0;
     for (vec<char> c : this->board) {
         for (int x = 0; x < c.size(); x++) {
@@ -70,7 +76,6 @@ vec<V2d> Render::get_pix_of_line(V2d coords1, V2d coords2) {
 
 int Render::draw_line(V2d coords1, V2d coords2, char ch) {
     int errorCode = 0;
-
     //find out if y axis is longer
     bool isYLonger = true;
     if (abs(coords2.x - coords1.x) > abs(coords2.y - coords1.y)) {
@@ -81,17 +86,11 @@ int Render::draw_line(V2d coords1, V2d coords2, char ch) {
     
     vec<V2d> pixels = get_pix_of_line(coords1, coords2);
     for (V2d pixel : pixels) {
-        //cout << pixel.x << " " << pixel.y << ";";
         if (!isYLonger) pixel.swap();
         if (setchar(pixel, ch) == -1)
             errorCode = -1;
     }
-    //cout << endl;
     return errorCode;
-}
-
-bool less_than(V2d c1, V2d c2) {
-    return (c1.y < c2.y);
 }
 
 int Render::draw_triangle(V2d coords1, V2d coords2, V2d coords3, char ch, bool filled) {
@@ -105,18 +104,16 @@ int Render::draw_triangle(V2d coords1, V2d coords2, V2d coords3, char ch, bool f
     draw_line(coords2, coords3, 'e');
     draw_line(coords3, coords1, 'e');
     if (!filled) return errorCode;
-    vec<V2d> left_x = get_pix_of_line(coords1, coords3); // |
-                                                         //
+
+    vec<V2d> left_x = get_pix_of_line(coords1, coords3);
     vec<V2d> one_to_two = get_pix_of_line(coords1, coords2);
     vec<V2d> two_to_three = get_pix_of_line(coords2, coords3);
-    //if (one_to_two.size() != 1 && two_to_three.size() != 1) one_to_two.pop_back();
     if (one_to_two.size() == 1 && one_to_two[0].y == two_to_three[0].y) one_to_two.pop_back();
+
     vec<V2d> right_x(one_to_two.begin(), one_to_two.end());
     right_x.insert(right_x.end(), two_to_three.begin(), two_to_three.end());
 
-    //for (V2d z : right_x) cout << z.x << " " << z.y << "; ";
     for (int i = 0; i < left_x.size(); i++) {
-        cout << left_x[i].x << " " << left_x[i].y << "<>" << right_x[i].x << " " << right_x[i].y << ";" << one_to_two.size() << endl;
         draw_line(left_x[i], right_x[i], ch);
     }
     return errorCode;
