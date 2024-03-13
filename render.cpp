@@ -100,9 +100,9 @@ int Render::draw_triangle(V2d coords1, V2d coords2, V2d coords3, char ch, bool f
     if (coords3.y < coords1.y) swap(coords1, coords3);
     if (coords3.y < coords2.y) swap(coords2, coords3);
     //draw edges
-    draw_line(coords1, coords2, 'e');
-    draw_line(coords2, coords3, 'e');
-    draw_line(coords3, coords1, 'e');
+    draw_line(coords1, coords2, ch);
+    draw_line(coords2, coords3, ch);
+    draw_line(coords3, coords1, ch);
     if (!filled) return errorCode;
 
     vec<V2d> left_x = get_pix_of_line(coords1, coords3);

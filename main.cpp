@@ -15,10 +15,10 @@ int main() {
     while (true) {
         srand(a);
         for (int i = 0; i < 3; i++)
-            xs.push_back((rand()%160));
+            xs.push_back((rand()%180-10));
         for (int i = 0; i < 3; i++)
-            ys.push_back(rand()%40);
-        r.draw_triangle(V2d(xs[0],ys[0]), V2d(xs[1],ys[1]), V2d(xs[2],ys[2]), '&');
+            ys.push_back(rand()%60-10);
+        r.draw_triangle(V2d(xs[0],ys[0]), V2d(xs[1],ys[1]), V2d(xs[2],ys[2]), '#', false);
         cout << a << endl;
         r.display();
         a++;
