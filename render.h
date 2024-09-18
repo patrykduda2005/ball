@@ -15,6 +15,7 @@ using vec = vector<T>;
 
 class Render {
     vec<vec<char>> board;
+    public:
     int width;
     int height;
 
